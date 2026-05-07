@@ -1,0 +1,94 @@
+import json
+import os
+
+FILE_NAME = "notes.json"
+
+def load_notes():
+    if os.path.exists(FILE_NAME):
+        with open(FILE_NAME, "r") as file:
+            return json.load(file)
+    return {}
+
+def save_notes(notes):
+    with open(FILE_NAME, "w") as file:
+        json.dump(notes, file)
+
+def add_note(notes):
+    note = input("Enter note: ")
+    note_id = str(len(notes) + 1)
+    notes[note_id] = note
+    save_notes(notes)
+    print("Note added.")
+
+def view_notes(notes):
+    if not notes:
+        print("No notes available.")
+        return
+    
+    for id, note in notes.items():
+        print(f"{id}: {note}")
+
+def search_notes(notes):
+    keyword = input("Enter keyword: ").lower()
+    found = False
+
+    for id, note in notes.items():
+        if keyword in note.lower():
+            print(f"{id}: {note}")
+            found = True
+
+    if not found:
+        print("No matching notes found.")
+
+def delete_note(notes, stack):
+    note_id = input("Enter note ID to delete: ")
+
+    if note_id in notes:
+        stack.append((note_id, notes[note_id]))
+        del notes[note_id]
+        save_notes(notes)
+        print("Note deleted.")
+    else:
+        print("Invalid ID.")
+
+def undo_delete(notes, stack):
+    if stack:
+        note_id, note = stack.pop()
+        notes[note_id] = note
+        save_notes(notes)
+        print("Undo successful.")
+    else:
+        print("Nothing to undo.")
+
+def main():
+    notes = load_notes()
+    stack = []
+
+    while True:
+        print("\n--- Smart Notes Organizer ---")
+        print("1. Add Note")
+        print("2. View Notes")
+        print("3. Search Notes")
+        print("4. Delete Note")
+        print("5. Undo Delete")
+        print("6. Exit")
+
+        choice = input("Enter choice: ")
+
+        if choice == "1":
+            add_note(notes)
+        elif choice == "2":
+            view_notes(notes)
+        elif choice == "3":
+            search_notes(notes)
+        elif choice == "4":
+            delete_note(notes, stack)
+        elif choice == "5":
+            undo_delete(notes, stack)
+        elif choice == "6":
+            break
+        else:
+            print("Invalid choice")
+
+if __name__ == "__main__":
+    main()
